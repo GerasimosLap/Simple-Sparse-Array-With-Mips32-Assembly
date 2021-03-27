@@ -1,0 +1,398 @@
+.text
+.globl main
+
+main:
+	li $s0,0
+	li $s1,0
+	li $s2,0
+	
+	
+	la $a0, readA	#print menu
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, readB	
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, createSparseA	
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, createSparseB	
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, createSparseC	
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, showA
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, showB
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, showC	
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	la $a0, showExit	
+	li $v0,4
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+
+	
+	jal menu
+	
+	li $v0,10
+	syscall
+	
+menu:
+	la $t0,A
+	la $t1,B
+	li $t2,0
+	li $t3,0
+	la $t4,sparseA
+	la $t5,sparseB
+	la $t6,sparseC
+	li $t7,0
+	
+	
+	la $a0,choice
+	li $v0,4
+	syscall
+	
+	li $v0,5	#read answer
+	syscall	
+	
+	move $a0,$v0
+	
+	beq $a0,$zero,choice0
+	beq $a0,1,choice1
+	beq $a0,2,choice2
+	beq $a0,3,choice3
+	beq $a0,4,choice4
+	beq $a0,5,choice5
+	beq $a0,6,choice6
+	beq $a0,7,choice7
+	beq $a0,8,choice8
+	
+	j menu
+	
+
+choice0:
+	jr $ra
+
+choice1:
+	bge $t2,10,menu
+	
+	li $v0,5	
+	syscall
+	
+	sw $v0,($t0)
+
+	addi $t0,$t0,4
+	addi $t2,$t2,1
+	
+	j choice1
+
+choice2:
+	bge $t2,10,menu
+	
+	li $v0,5	
+	syscall
+	
+	sb $v0,($t1)
+
+	addi $t1,$t1,4
+	addi $t2,$t2,1
+	
+	j choice2
+	
+choice3:
+	beq $t2,10,mover
+	
+	lw $t8,($t0)
+	addi $t0,$t0,4
+	
+	move $a0,$t3
+	li $v0,1
+	syscall
+	
+	move $t9,$t2
+	addi $t2,$t2,1
+	beqz $t8,choice3
+	
+	sb $t9,($t4)
+	addi $t4,$t4,4
+	addi $t3,$t3,1
+	
+	sb $t8,($t4)
+	addi $t4,$t4,4
+	addi $t3,$t3,1
+	
+	j choice3
+mover: 
+ 	move $a0,$t3
+	li $v0,1
+	syscall
+	
+	move $s0,$t3
+
+ 	j menu
+choice4:
+	beq $t2,10,mover1
+	
+	lb $t8,($t1)
+	addi $t1,$t1,4
+	
+	move $a0,$t3
+	li $v0,1
+	syscall
+	
+	move $t9,$t2
+	
+	addi $t2,$t2,1
+	beqz $t8,choice4
+	
+	sb $t9,($t5)
+	addi $t5,$t5,4
+	addi $t3,$t3,1
+	
+	sb $t8,($t5)
+	addi $t5,$t5,4
+	addi $t3,$t3,1
+	
+	j choice4
+mover1: 
+ 	move $a0,$t3
+	li $v0,1
+	syscall
+	
+	move $s1,$t3
+
+ 	j menu
+ 	
+choice5:
+	first_for:
+		bge $t2,$s0,second_for #if a>=mikosA pigene sto 2o for
+		bge $t3,$s1,second_for #if b>=mikosB pigene sto 2o for
+		
+		lb $s3,($t4) #$t4 is sparseA
+		lb $s4,($t5) #$t5 is sparseB
+		
+		blt $s3,$s4,if1 #if SparseA[a]<SparceB[b]
+		bgt $s3,$s4,if2#if SparseA[a]>SparceB[b]
+		beq $s3,$s4,if3#if SparseA[a]=SparceB[b]
+		if1:
+			sb $s3,($t6)#SparsC[c]=SparseA[a]
+			
+			addi $t2,$t2,1#a++
+			addi $t7,$t7,1#c++
+			addi $t4,$t4,4#kataxwrhths A
+			addi $t6,$t6,4#Kataxwrhths C
+			
+			lb $s3,($t4)
+			sb $s3,($t6)#SparsC[c]=SparseA[a]
+			
+			addi $t2,$t2,1#a++
+			addi $t7,$t7,1#c++
+			addi $t4,$t4,4#kataxwrhths A
+			addi $t6,$t6,4#Kataxwrhths C
+			
+			j first_for
+			
+		if2:
+			sb $s4,($t6)#SparsC[c]=SparseB[b]
+			
+			addi $t3,$t3,1#b++
+			addi $t7,$t7,1#c++
+			addi $t5,$t5,4#kataxwrhths B
+			addi $t6,$t6,4#Kataxwrhths C
+			
+			lb $s4,($t5)
+			sb $s4,($t6)#SparsC[c]=SparseB[b]
+			
+			
+			addi $t3,$t3,1#b++
+			addi $t7,$t7,1#c++
+			addi $t5,$t5,4#kataxwrhths B
+			addi $t6,$t6,4#Kataxwrhths C
+			
+			j first_for
+		
+		if3:
+			sb $s3,($t6)#SparsC[c]=SparseA[a]
+			
+			addi $t2,$t2,1#a++
+			addi $t7,$t7,1#c++
+			addi $t4,$t4,4#kataxwrhths A
+			addi $t6,$t6,4#Kataxwrhths C
+			
+			addi $t3,$t3,1#b++
+			addi $t5,$t5,4#kataxwrhths B
+			
+			lb $s3,($t4)
+			lb $s4,($t5)
+			
+			
+			add $s3,$s3,$s4 #SparseC[c]=SparseA[a]+SparseB[b]
+			
+			sb $s3,($t6)
+			
+			
+			addi $t2,$t2,1#a++
+			addi $t3,$t3,1#b++
+			addi $t7,$t7,1#c++
+			addi $t4,$t4,4#kataxwrhths A
+			addi $t5,$t5,4#kataxwrhths B
+			addi $t6,$t6,4#Kataxwrhths C
+			
+			j first_for
+			
+	second_for:
+		bge $t2,$s0,third_for
+		
+		lb $s3,($t4)
+		
+		sb $s3,($t6)#SparsC[c]=SparseA[a]
+		
+		addi $t2,$t2,1#a++
+		addi $t7,$t7,1#c++
+		addi $t4,$t4,4#kataxwrhths A
+		addi $t6,$t6,4#Kataxwrhths C
+		
+		lb $s3,($t4)
+		sb $s3,($t6)#SparsC[c]=SparseA[a]
+	
+		addi $t2,$t2,1#a++
+		addi $t7,$t7,1#c++
+		addi $t4,$t4,4#kataxwrhths A
+		addi $t6,$t6,4#Kataxwrhths C
+		
+		j second_for
+	
+	third_for:
+		
+		bge $t3,$s1,mover2
+		
+		lb $s4,($t5)
+		sb $s4,($t6)#SparsC[c]=SparseB[b]
+		
+		addi $t3,$t3,1#b++
+		addi $t7,$t7,1#c++
+		addi $t5,$t5,4#kataxwrhths B
+		addi $t6,$t6,4#Kataxwrhths C
+		
+		lb $s4,($t5)
+		sb $s4,($t6)#SparsC[c]=SparseB[b]
+		
+		addi $t3,$t3,1#b++
+		addi $t7,$t7,1#c++
+		addi $t5,$t5,4#kataxwrhths B
+		addi $t6,$t6,4#Kataxwrhths C
+			
+		j third_for
+		
+	mover2:
+		move $s2,$t7
+		
+		j menu        
+ 
+	
+choice6:
+	bge $t2,$s0,menu
+	
+	lb $t8,($t4)
+	move $a0,$t8
+	li $v0,1
+	syscall
+
+	addi $t4,$t4,4
+	addi $t2,$t2,1
+	j choice6
+	
+choice7:
+	bge $t2,$s1,menu
+	
+	lb $t8,($t5)
+	move $a0,$t8
+	li $v0,1
+	syscall
+
+	addi $t5,$t5,4
+	addi $t2,$t2,1
+	j choice7
+choice8:
+	beq $t2,$s2,menu
+	
+	
+	lb $a0,($t6)
+	li $v0,1
+	syscall
+	
+	la $a0,clrf
+	li $v0,4
+	syscall
+	
+	addi $t6,$t6,4
+	addi $t2,$t2,1
+	j choice8
+	
+	
+.data
+	N: .word 0
+	A: .space 40
+	B: .space 40
+	clrf: .asciiz "\n"
+	sparseA: .space 80
+	sparseB: .space 80
+	sparseC: .space 160
+	choice: .asciiz "Choose: "
+	readA: .asciiz "1.Read Array A	"
+	readB: .asciiz "2.Read Array B	"
+	createSparseA: .asciiz "3.Create Array A "
+	createSparseB: .asciiz "4.Create Array B	"
+	createSparseC: .asciiz "5.Create Array C(A+B)	"
+	showA: .asciiz "6.Display Sparce A	"
+	showB: .asciiz "7.Display Sparce  B	"
+	showC: .asciiz "8.Display Sparce  C	"
+	showExit: .asciiz "0.exit"
